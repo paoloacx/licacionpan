@@ -10,7 +10,7 @@
   .btn{padding:6px 10px;border:none;border-radius:6px;cursor:pointer;background:#7c5cff;color:white}
   main{display:flex;gap:20px;padding:20px}
   .panel{width:200px}
-  canvas{border:1px solid #555;border-radius:8px;display:block}
+  canvas{border:1px solid #555;border-radius:8px;display:block;background:#111}
   .sticker{cursor:pointer;font-size:24px;margin:4px}
 </style>
 </head>
@@ -31,10 +31,15 @@
       <span class="sticker">🎩</span>
       <span class="sticker">🦴</span>
     </div>
+    <h3>Audio</h3>
+    <button class="btn" id="recordBtn">🎙️ Grabar</button>
+    <button class="btn" id="stopBtn" disabled>⏹️ Parar</button>
+    <button class="btn" id="playBtn" disabled>▶️ Reproducir</button>
+    <input type="file" id="fileAudio" accept="audio/*">
   </div>
   <div style="flex:1;position:relative">
     <canvas id="drawCanvas" width="800" height="500"></canvas>
-    <canvas id="stickerCanvas" width="800" height="500" style="position:absolute;left:0;top:0"></canvas>
+    <canvas id="stickerCanvas" width="800" height="500" style="position:absolute;left:0;top:0;pointer-events:none"></canvas>
   </div>
 </main>
 
@@ -48,6 +53,11 @@ let drawing=false,last=null;
 let stickers=[];let selected=-1;
 
 // Dibujo
+function pos(e){
+  const r=drawCanvas.getBoundingClientRect();
+  if(e.touches){return {x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}}
+  return {x:e.clientX-r.left,y:e.clientY-r.top}
+}
 drawCanvas.addEventListener('mousedown',e=>{drawing=true;last=pos(e)});
 drawCanvas.addEventListener('mousemove',e=>{
   if(!drawing)return;
@@ -67,12 +77,6 @@ drawCanvas.addEventListener('touchmove',e=>{
 },{passive:false});
 window.addEventListener('touchend',()=>drawing=false);
 
-function pos(e){
-  const r=drawCanvas.getBoundingClientRect();
-  if(e.touches){return {x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}}
-  return {x:e.clientX-r.left,y:e.clientY-r.top}
-}
-
 // Stickers
 document.getElementById('stickers').addEventListener('click',e=>{
   if(e.target.classList.contains('sticker')){
@@ -85,41 +89,4 @@ function renderStickers(){
   stickers.forEach((s,i)=>{
     sctx.font=s.size+"px serif";
     sctx.textAlign="center";sctx.textBaseline="middle";
-    sctx.fillText(s.emoji,s.x,s.y);
-    if(i===selected){
-      sctx.strokeStyle="cyan";sctx.strokeRect(s.x-s.size/2,s.y-s.size/2,s.size,s.size);
-    }
-  });
-}
-stickerCanvas.addEventListener('mousedown',e=>{
-  const p=pos(e);
-  selected=stickers.findIndex(s=>p.x>=s.x-s.size/2&&p.x<=s.x+s.size/2&&p.y>=s.y-s.size/2&&p.y<=s.y+s.size/2);
-  renderStickers();
-});
-stickerCanvas.addEventListener('mousemove',e=>{
-  if(selected>=0&&e.buttons){
-    const p=pos(e);
-    stickers[selected].x=p.x;stickers[selected].y=p.y;
-    renderStickers();
-  }
-});
-
-// Guardar mascota
-document.getElementById('saveBtn').addEventListener('click',()=>{
-  const temp=document.createElement('canvas');
-  temp.width=drawCanvas.width;temp.height=drawCanvas.height;
-  const tctx=temp.getContext('2d');
-  tctx.drawImage(drawCanvas,0,0);
-  tctx.drawImage(stickerCanvas,0,0);
-  tctx.fillStyle="#fff";tctx.font="20px sans-serif";
-  tctx.fillText(petName.value||"Sin nombre",20,30);
-  const png=temp.toDataURL("image/png");
-  const todas=JSON.parse(localStorage.getItem('todasLasMascotas')||'[]');
-  const idx=localStorage.getItem('mascotaActual');
-  if(idx!==null){
-    todas[idx]={nombre:petName.value||"Sin nombre",png};
-    localStorage.removeItem('mascotaActual');
-  }else{
-    todas.push({nombre:petName.value||"Sin nombre",png});
-  }
-  localStorage.setItem('todasLasMascotas',JSON.stringify(todas));
+    sctx
