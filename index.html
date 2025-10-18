@@ -1,74 +1,571 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Mi Aldea de Mascotas</title>
-<style>
-  body{
-    margin:0; font-family:sans-serif;
-    background:linear-gradient(#87ceeb 60%, #228B22 40%);
-    min-height:100vh; padding:20px;
-  }
-  h1{text-align:center; color:#fff; text-shadow:2px 2px #333}
-  .aldea{display:flex; flex-wrap:wrap; gap:30px; justify-content:center; margin-top:20px}
-  .casa{
-    width:200px; background:#fff; border:3px solid #444; border-radius:10px;
-    box-shadow:0 6px 10px rgba(0,0,0,0.3); text-align:center; padding:10px; position:relative;
-  }
-  .techo{
-    position:absolute; top:-40px; left:0; width:0; height:0;
-    border-left:100px solid transparent; border-right:100px solid transparent;
-    border-bottom:40px solid #b22222;
-  }
-  .casa img{max-width:100%; border-radius:8px; margin-top:10px}
-  .casa h3{margin:8px 0 4px}
-  .btn{padding:6px 10px; border:none; border-radius:6px; cursor:pointer; background:#7c5cff; color:white; margin:4px}
-  .arbol{
-    width:60px; height:100px; background:#8b4513; border-radius:10px; position:absolute; bottom:0;
-  }
-  .arbol::before{
-    content:""; position:absolute; bottom:60px; left:-30px;
-    width:120px; height:80px; background:#006400; border-radius:50%;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetVillage - Creador de Mascotas</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --secondary: #2196F3;
+            --accent: #FF9800;
+            --light: #f5f5f5;
+            --dark: #333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .editor-panel {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background: var(--light);
+        }
+        
+        .village-panel {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background: #e9f5ff;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background: #3d8b40;
+        }
+        
+        .canvas-container {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            margin: 15px 0;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #drawingCanvas {
+            display: block;
+            background: white;
+            cursor: crosshair;
+        }
+        
+        .tools {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .tool-btn {
+            flex: 1;
+            padding: 8px;
+            background: var(--secondary);
+        }
+        
+        .tool-btn.active {
+            background: var(--accent);
+        }
+        
+        .colors {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .color.active {
+            border-color: var(--dark);
+        }
+        
+        .audio-controls {
+            margin-top: 15px;
+        }
+        
+        .audio-preview {
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .village {
+            flex: 1;
+            background: #c8e6c9;
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 300px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-content: flex-start;
+            overflow-y: auto;
+        }
+        
+        .pet-card {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            width: 150px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+        
+        .pet-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .pet-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .pet-image {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .pet-image canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .play-audio {
+            background: var(--accent);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        
+        .empty-village {
+            text-align: center;
+            color: #777;
+            width: 100%;
+            margin-top: 50px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>🏡 Mi Aldea de Mascotas</h1>
-  <div class="aldea" id="aldea"></div>
-  <div style="text-align:center;margin-top:20px">
-    <button class="btn" onclick="nueva()">➕ Crear nueva mascota</button>
-  </div>
-  <div class="arbol" style="left:20px"></div>
-  <div class="arbol" style="right:20px"></div>
+    <div class="container">
+        <header>
+            <h1>PetVillage</h1>
+            <p class="subtitle">Crea tu mascota virtual y únela a nuestro pueblo compartido</p>
+        </header>
+        
+        <div class="app-container">
+            <div class="editor-panel">
+                <h2 class="panel-title">Creador de Mascotas</h2>
+                
+                <div class="form-group">
+                    <label for="petName">Nombre de tu mascota:</label>
+                    <input type="text" id="petName" placeholder="Ej: Pelusita, Firulais...">
+                </div>
+                
+                <div class="form-group">
+                    <label>Dibuja a tu mascota:</label>
+                    <div class="tools">
+                        <button class="tool-btn active" id="pencilTool">Lápiz</button>
+                        <button class="tool-btn" id="eraserTool">Borrador</button>
+                        <button class="tool-btn" id="clearTool">Limpiar</button>
+                    </div>
+                    
+                    <div class="colors">
+                        <div class="color active" style="background-color: #000000;" data-color="#000000"></div>
+                        <div class="color" style="background-color: #ff0000;" data-color="#ff0000"></div>
+                        <div class="color" style="background-color: #0000ff;" data-color="#0000ff"></div>
+                        <div class="color" style="background-color: #00ff00;" data-color="#00ff00"></div>
+                        <div class="color" style="background-color: #ffff00;" data-color="#ffff00"></div>
+                        <div class="color" style="background-color: #ff00ff;" data-color="#ff00ff"></div>
+                    </div>
+                    
+                    <div class="canvas-container">
+                        <canvas id="drawingCanvas" width="400" height="300"></canvas>
+                    </div>
+                </div>
+                
+                <div class="form-group audio-controls">
+                    <label for="petSound">Sonido de tu mascota:</label>
+                    <input type="file" id="petSound" accept="audio/*">
+                    <audio id="audioPreview" class="audio-preview" controls></audio>
+                </div>
+                
+                <button id="savePet">Guardar Mascota</button>
+            </div>
+            
+            <div class="village-panel">
+                <h2 class="panel-title">Nuestro Pueblo de Mascotas</h2>
+                <p>Aquí viven todas las mascotas creadas por la comunidad</p>
+                
+                <div class="village" id="villageContainer">
+                    <div class="empty-village">
+                        <p>¡Aún no hay mascotas en el pueblo!</p>
+                        <p>Sé el primero en crear una mascota.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>PetVillage - Un proyecto para crear y compartir mascotas virtuales</p>
+        </footer>
+    </div>
 
-  <script>
-    const aldea = document.getElementById('aldea');
-    const mascotas = JSON.parse(localStorage.getItem('todasLasMascotas')||'[]');
-    mascotas.forEach((m,i)=>{
-      const div = document.createElement('div');
-      div.className='casa';
-      div.innerHTML = `
-        <div class="techo"></div>
-        <img src="${m.png}" alt="Mascota ${m.nombre}">
-        <h3>${m.nombre}</h3>
-        <button class="btn" onclick="editar(${i})">Editar</button>
-        ${m.audio ? `<button class="btn" onclick="reproducir(${i})">🔊 Sonido</button>` : ""}
-      `;
-      aldea.appendChild(div);
-    });
-    function editar(i){
-      localStorage.setItem('mascotaActual', i);
-      window.location.href='editor.html';
-    }
-    function nueva(){
-      localStorage.removeItem('mascotaActual');
-      window.location.href='editor.html';
-    }
-    function reproducir(i){
-      const mascotas = JSON.parse(localStorage.getItem('todasLasMascotas')||'[]');
-      const audio = new Audio(mascotas[i].audio);
-      audio.play();
-    }
-  </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const canvas = document.getElementById('drawingCanvas');
+            const ctx = canvas.getContext('2d');
+            const petNameInput = document.getElementById('petName');
+            const petSoundInput = document.getElementById('petSound');
+            const audioPreview = document.getElementById('audioPreview');
+            const savePetBtn = document.getElementById('savePet');
+            const villageContainer = document.getElementById('villageContainer');
+            
+            // Herramientas de dibujo
+            const pencilTool = document.getElementById('pencilTool');
+            const eraserTool = document.getElementById('eraserTool');
+            const clearTool = document.getElementById('clearTool');
+            const colorElements = document.querySelectorAll('.color');
+            
+            // Variables de estado
+            let isDrawing = false;
+            let currentTool = 'pencil';
+            let currentColor = '#000000';
+            let lastX = 0;
+            let lastY = 0;
+            let currentAudio = null;
+            
+            // Inicializar el lienzo
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Eventos de dibujo
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('touchstart', handleTouchStart);
+            
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('touchmove', handleTouchMove);
+            
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Configurar herramientas
+            pencilTool.addEventListener('click', function() {
+                setActiveTool('pencil');
+            });
+            
+            eraserTool.addEventListener('click', function() {
+                setActiveTool('eraser');
+            });
+            
+            clearTool.addEventListener('click', function() {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            });
+            
+            // Configurar colores
+            colorElements.forEach(color => {
+                color.addEventListener('click', function() {
+                    colorElements.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    currentColor = this.getAttribute('data-color');
+                });
+            });
+            
+            // Manejar archivo de audio
+            petSoundInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const objectURL = URL.createObjectURL(file);
+                    audioPreview.src = objectURL;
+                    audioPreview.style.display = 'block';
+                    currentAudio = objectURL;
+                }
+            });
+            
+            // Guardar mascota
+            savePetBtn.addEventListener('click', function() {
+                const name = petNameInput.value.trim();
+                if (!name) {
+                    alert('¡Por favor, ponle un nombre a tu mascota!');
+                    return;
+                }
+                
+                // Obtener la imagen del canvas
+                const imageData = canvas.toDataURL();
+                
+                // Crear objeto mascota
+                const pet = {
+                    id: Date.now(),
+                    name: name,
+                    image: imageData,
+                    sound: currentAudio,
+                    created: new Date().toLocaleDateString()
+                };
+                
+                // Guardar en localStorage
+                savePetToStorage(pet);
+                
+                // Añadir al pueblo
+                addPetToVillage(pet);
+                
+                // Limpiar formulario
+                petNameInput.value = '';
+                petSoundInput.value = '';
+                audioPreview.style.display = 'none';
+                audioPreview.src = '';
+                currentAudio = null;
+                
+                // Limpiar canvas
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                alert(`¡${name} se ha unido al pueblo!`);
+            });
+            
+            // Cargar mascotas existentes al iniciar
+            loadPetsFromStorage();
+            
+            // Funciones de dibujo
+            function startDrawing(e) {
+                isDrawing = true;
+                const pos = getMousePos(canvas, e);
+                [lastX, lastY] = [pos.x, pos.y];
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                const pos = getMousePos(canvas, e);
+                const currentX = pos.x;
+                const currentY = pos.y;
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(currentX, currentY);
+                
+                if (currentTool === 'pencil') {
+                    ctx.strokeStyle = currentColor;
+                } else if (currentTool === 'eraser') {
+                    ctx.strokeStyle = 'white';
+                }
+                
+                ctx.stroke();
+                
+                [lastX, lastY] = [currentX, currentY];
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            function handleTouchStart(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            }
+            
+            function handleTouchMove(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            }
+            
+            function getMousePos(canvas, evt) {
+                const rect = canvas.getBoundingClientRect();
+                let clientX, clientY;
+                
+                if (evt.type.includes('touch')) {
+                    clientX = evt.touches[0].clientX;
+                    clientY = evt.touches[0].clientY;
+                } else {
+                    clientX = evt.clientX;
+                    clientY = evt.clientY;
+                }
+                
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+            
+            function setActiveTool(tool) {
+                currentTool = tool;
+                
+                // Actualizar botones activos
+                pencilTool.classList.toggle('active', tool === 'pencil');
+                eraserTool.classList.toggle('active', tool === 'eraser');
+            }
+            
+            // Funciones para gestionar mascotas
+            function savePetToStorage(pet) {
+                let pets = JSON.parse(localStorage.getItem('petVillage')) || [];
+                pets.push(pet);
+                localStorage.setItem('petVillage', JSON.stringify(pets));
+            }
+            
+            function loadPetsFromStorage() {
+                const pets = JSON.parse(localStorage.getItem('petVillage')) || [];
+                
+                // Eliminar mensaje de pueblo vacío si hay mascotas
+                if (pets.length > 0) {
+                    const emptyMessage = villageContainer.querySelector('.empty-village');
+                    if (emptyMessage) {
+                        emptyMessage.remove();
+                    }
+                }
+                
+                pets.forEach(pet => addPetToVillage(pet));
+            }
+            
+            function addPetToVillage(pet) {
+                // Eliminar mensaje de pueblo vacío si existe
+                const emptyMessage = villageContainer.querySelector('.empty-village');
+                if (emptyMessage) {
+                    emptyMessage.remove();
+                }
+                
+                const petCard = document.createElement('div');
+                petCard.className = 'pet-card';
+                petCard.innerHTML = `
+                    <div class="pet-name">${pet.name}</div>
+                    <div class="pet-image">
+                        <img src="${pet.image}" alt="${pet.name}">
+                    </div>
+                    <div class="pet-date">Creado: ${pet.created}</div>
+                    ${pet.sound ? '<button class="play-audio" data-sound="' + pet.sound + '">🔊 Sonido</button>' : ''}
+                `;
+                
+                villageContainer.appendChild(petCard);
+                
+                // Añadir evento para reproducir sonido
+                if (pet.sound) {
+                    const playButton = petCard.querySelector('.play-audio');
+                    playButton.addEventListener('click', function() {
+                        const audio = new Audio(pet.sound);
+                        audio.play();
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>
