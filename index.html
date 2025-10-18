@@ -4,25 +4,42 @@
 <meta charset="UTF-8">
 <title>Mi Aldea de Mascotas</title>
 <style>
-  body{background:#eef; font-family:sans-serif; padding:20px}
-  h1{text-align:center}
-  .aldea{display:flex; flex-wrap:wrap; gap:20px; justify-content:center}
-  .casa{
-    width:180px; border:2px solid #444; border-radius:10px;
-    background:white; padding:10px; text-align:center;
-    box-shadow:0 4px 6px rgba(0,0,0,0.2);
+  body{
+    margin:0; font-family:sans-serif;
+    background:linear-gradient(#87ceeb 60%, #228B22 40%);
+    min-height:100vh; padding:20px;
   }
-  .casa img{max-width:100%; border-radius:8px}
+  h1{text-align:center; color:#fff; text-shadow:2px 2px #333}
+  .aldea{display:flex; flex-wrap:wrap; gap:30px; justify-content:center; margin-top:20px}
+  .casa{
+    width:200px; background:#fff; border:3px solid #444; border-radius:10px;
+    box-shadow:0 6px 10px rgba(0,0,0,0.3); text-align:center; padding:10px; position:relative;
+  }
+  .techo{
+    position:absolute; top:-40px; left:0; width:0; height:0;
+    border-left:100px solid transparent; border-right:100px solid transparent;
+    border-bottom:40px solid #b22222;
+  }
+  .casa img{max-width:100%; border-radius:8px; margin-top:10px}
   .casa h3{margin:8px 0 4px}
-  .btn{padding:6px 10px; border:none; border-radius:6px; cursor:pointer; background:#7c5cff; color:white}
+  .btn{padding:6px 10px; border:none; border-radius:6px; cursor:pointer; background:#7c5cff; color:white; margin:4px}
+  .arbol{
+    width:60px; height:100px; background:#8b4513; border-radius:10px; position:absolute; bottom:0;
+  }
+  .arbol::before{
+    content:""; position:absolute; bottom:60px; left:-30px;
+    width:120px; height:80px; background:#006400; border-radius:50%;
+  }
 </style>
 </head>
 <body>
-  <h1>🏡 Mis Mascotas</h1>
+  <h1>🏡 Mi Aldea de Mascotas</h1>
   <div class="aldea" id="aldea"></div>
   <div style="text-align:center;margin-top:20px">
     <button class="btn" onclick="nueva()">➕ Crear nueva mascota</button>
   </div>
+  <div class="arbol" style="left:20px"></div>
+  <div class="arbol" style="right:20px"></div>
 
   <script>
     const aldea = document.getElementById('aldea');
@@ -31,9 +48,11 @@
       const div = document.createElement('div');
       div.className='casa';
       div.innerHTML = `
+        <div class="techo"></div>
         <img src="${m.png}" alt="Mascota ${m.nombre}">
         <h3>${m.nombre}</h3>
         <button class="btn" onclick="editar(${i})">Editar</button>
+        ${m.audio ? `<button class="btn" onclick="reproducir(${i})">🔊 Sonido</button>` : ""}
       `;
       aldea.appendChild(div);
     });
@@ -44,6 +63,11 @@
     function nueva(){
       localStorage.removeItem('mascotaActual');
       window.location.href='editor.html';
+    }
+    function reproducir(i){
+      const mascotas = JSON.parse(localStorage.getItem('todasLasMascotas')||'[]');
+      const audio = new Audio(mascotas[i].audio);
+      audio.play();
     }
   </script>
 </body>
